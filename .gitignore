@@ -82,3 +82,4 @@ tests/*.trs
 .idea/
 CMakeLists.txt
 cmake-build-debug/
+build/
