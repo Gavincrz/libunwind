@@ -79,3 +79,6 @@ tests/[GL]x64-test-dwarf-expressions
 tests/x64-unwind-badjmp-signal-frame
 tests/*.log
 tests/*.trs
+.idea/
+CMakeLists.txt
+cmake-build-debug/
