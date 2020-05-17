@@ -343,14 +343,8 @@ static inline void invalidate_edi (struct elf_dyn_info *edi)
 #define MAX_FN_SYM 10000
 struct fn_symbol_table_t {
     char* name;
-
-#if ELF_CLASS == ELFCLASS64
     Elf64_Addr val;
     Elf64_Half st_shndx;
-#elif ELF_CLASS == ELFCLASS32
-    Elf32_Addr val;
-    Elf43_Half st_shndx;
-#endif
 };
 
 struct image_cache_entry_t {
