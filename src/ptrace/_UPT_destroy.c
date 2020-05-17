@@ -26,33 +26,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include "_UPT_internal.h"
 
 void
-free_mem_region(struct proc_info* info)
-{
-    for (int i = 0; i < MAX_REGIONS; i++)
-    {
-        free(info->regions[i].data);
-        info->regions[i].data = NULL;
-    }
-    info->num_regions = 0;
-}
-
-void
-destroy_proc_info(struct proc_info* info)
-{
-    free_mem_region(info);
-    fclose(info->map_fp);
-    close(info->mem_fd);
-
-    // print some statics
-    fprintf(stderr, "==================, invocations = %d, mem_access= %d, read,lseek = %d",
-               info->num_invocation, info->num_memaccess, info->num_read_lseek);
-}
-
-void
 _UPT_destroy (void *ptr)
 {
-
-  destroy_proc_info((struct proc_info *)ptr);
   struct UPT_info *ui = (struct UPT_info *) ptr;
   invalidate_edi (&ui->edi);
   free (ptr);
