@@ -345,15 +345,16 @@ struct fn_symbol_table_t {
     char* name;
 #if ELF_CLASS == ELFCLASS64
     Elf64_Addr val;
+    Elf64_Half st_shndx;
 #elif ELF_CLASS == ELFCLASS32
     Elf32_Addr val;
+    Elf43_Half st_shndx;
 #endif
 };
 
 struct image_cache_entry_t {
-    struct elf_image *ei;
+    struct elf_image ei;
     char* binary_filename;
-    struct elf_image *debug_ei;
     struct fn_symbol_table_t* symbol_table;
     int num_symbol;
 };
@@ -406,6 +407,7 @@ struct proc_info
     struct mmap_cache_entry_t * (*mmap_cache_search_void)(void*, unsigned long);
     void* tcp;
     void* image_cache;
+    int num_image_cache;
 };
 
 
