@@ -33,12 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #ifdef HAVE_LZMA
 #include <lzma.h>
 #endif /* HAVE_LZMA */
-static long num_get_elf_image = 0;
-static long num_get_debug_link = 0;
-static long num_get_proc_name = 0;
-static long long get_elf_image_ms = 0;
-static long long get_debug_link_ms = 0;
-static long long get_proc_name_ms = 0;
+
 
 static Elf_W (Shdr)*
 elf_w (section_table) (struct elf_image *ei)
@@ -408,10 +403,11 @@ elf_w (get_proc_name_in_cache) (const char* file,
     int ret;
 
     // find file in cache
+    struct image_cache_entry_t *entries = info->image_cache;
     struct image_cache_entry_t *cache_entry = NULL;
     for (int i = 0; i < info->num_image_cache; i++) {
-        struct image_cache_entry_t* temp_entry = &(info->image_cache[i]);
-        if (strcmp(file, cache_entry->binary_filename) == 0))
+        struct image_cache_entry_t* temp_entry = &(entries[i]);
+        if (strcmp(file, cache_entry->binary_filename) == 0)
             cache_entry = temp_entry;
     }
     if (cache_entry == NULL)
@@ -441,31 +437,31 @@ elf_w (get_proc_name_in_cache) (const char* file,
 
     load_offset = elf_w (get_load_offset) (ei, segbase, mapoff);
 
+//
+//    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, buf, buf_len, &min_dist);
+//
+//    /* If the ELF image has MiniDebugInfo embedded in it, look up the symbol in
+//       there as well and replace the previously found if it is closer. */
+//    struct elf_image mdi;
+//    if (elf_w (extract_minidebuginfo) (ei, &mdi))
+//    {
+//        int ret_mdi = elf_w (lookup_symbol) (as, ip, &mdi, load_offset, buf,
+//                                             buf_len, &min_dist);
+//
+//        /* Closer symbol was found (possibly truncated). */
+//        if (ret_mdi == 0 || ret_mdi == -UNW_ENOMEM)
+//        {
+//            ret = ret_mdi;
+//        }
+//
+//        munmap (mdi.image, mdi.size);
+//    }
+//
+//    if (min_dist >= ei->size)
+//        return -UNW_ENOINFO;                /* not found */
+//    if (offp)
+//        *offp = min_dist;
 
-
-    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, buf, buf_len, &min_dist);
-
-    /* If the ELF image has MiniDebugInfo embedded in it, look up the symbol in
-       there as well and replace the previously found if it is closer. */
-    struct elf_image mdi;
-    if (elf_w (extract_minidebuginfo) (ei, &mdi))
-    {
-        int ret_mdi = elf_w (lookup_symbol) (as, ip, &mdi, load_offset, buf,
-                                             buf_len, &min_dist);
-
-        /* Closer symbol was found (possibly truncated). */
-        if (ret_mdi == 0 || ret_mdi == -UNW_ENOMEM)
-        {
-            ret = ret_mdi;
-        }
-
-        munmap (mdi.image, mdi.size);
-    }
-
-    if (min_dist >= ei->size)
-        return -UNW_ENOINFO;                /* not found */
-    if (offp)
-        *offp = min_dist;
     return ret;
 }
 
