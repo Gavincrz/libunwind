@@ -474,9 +474,6 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     char ori_buf[1024];
     ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
 
-
-    fprintf(stderr, "ori_name %s, ori_dist = %ld, my_name = %s, my_dist = %ld", ori_buf, ori_dist, buf, min_dist);
-
     if (offp)
         *offp = min_dist;
 
