@@ -474,7 +474,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     elf_w (get_proc_name_in_image) (as, ei, segbase, mapoff, ip, ori_buf, 1024, &ori_offp);
 
     if (ori_offp != min_dist){
-        fprintf("%s vs %s\n",buf, ori_buf);
+        fprintf(stderr, "%s vs %s\n",buf, ori_buf);
     }
 
     if (offp)
