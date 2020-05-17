@@ -55,6 +55,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #if defined(HAVE_ELF_H)
 # include <elf.h>
@@ -335,6 +337,31 @@ static inline void invalidate_edi (struct elf_dyn_info *edi)
   edi->di_arm.format = -1;
 #endif
 }
+
+struct mem_region
+{
+    unsigned long start_addr;
+    unsigned long end_addr;
+    bool writable;
+    void* data;
+};
+
+
+struct proc_info
+{
+    char reserved[256]; // reserved for UPT_info
+    char map_path[64]; // even they already saved in UPT_info, have no access to it
+    char mem_path[64];
+    int num_regions;
+    FILE* map_fp;
+    int mem_fd;
+    struct mem_region regions[MAX_REGIONS]; // create a max region, assume not excess
+    int num_invocation;
+    int num_memaccess;
+    int num_read_lseek;
+    struct mmap_cache_entry_t * (*mmap_cache_search_void)(void*, unsigned long);
+    void* tcp;
+};
 
 
 /* Provide a place holder for architecture to override for fast access

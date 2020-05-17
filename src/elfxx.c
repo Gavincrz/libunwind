@@ -322,46 +322,46 @@ elf_w (get_proc_name) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
   char file[PATH_MAX];
 
 
-  struct timeval start, end;
-  num_get_elf_image++;
-  gettimeofday(&start, NULL);
+//  struct timeval start, end;
+//  num_get_elf_image++;
+//  gettimeofday(&start, NULL);
 
   ret = tdep_get_elf_image (&ei, pid, ip, &segbase, &mapoff, file, PATH_MAX);
 
-  gettimeofday(&end, NULL);
-  long seconds = (end.tv_sec - start.tv_sec);
-  long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-  get_elf_image_ms += micros;
+//  gettimeofday(&end, NULL);
+//  long seconds = (end.tv_sec - start.tv_sec);
+//  long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+//  get_elf_image_ms += micros;
 
   if (ret < 0)
     return ret;
 
-  num_get_debug_link++;
-  gettimeofday(&start, NULL);
+//  num_get_debug_link++;
+//  gettimeofday(&start, NULL);
 
   ret = elf_w (load_debuglink) (file, &ei, 1);
 
-  gettimeofday(&end, NULL);
-  seconds = (end.tv_sec - start.tv_sec);
-  micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-  get_debug_link_ms += micros;
+//  gettimeofday(&end, NULL);
+//  seconds = (end.tv_sec - start.tv_sec);
+//  micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+//  get_debug_link_ms += micros;
 
   if (ret < 0)
     return ret;
 
-  num_get_proc_name++;
-  gettimeofday(&start, NULL);
+//  num_get_proc_name++;
+//  gettimeofday(&start, NULL);
 
   ret = elf_w (get_proc_name_in_image) (as, &ei, segbase, mapoff, ip, buf, buf_len, offp);
 
-  gettimeofday(&end, NULL);
-  seconds = (end.tv_sec - start.tv_sec);
-  micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-  get_proc_name_ms += micros;
+//  gettimeofday(&end, NULL);
+//  seconds = (end.tv_sec - start.tv_sec);
+//  micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+//  get_proc_name_ms += micros;
 
-  fprintf(stderr, "\nnum_get_elf_image: %ld, ms = %lld\n", num_get_elf_image, get_elf_image_ms);
-  fprintf(stderr, "num_get_debug_link: %ld, ms = %lld\n", num_get_debug_link, get_debug_link_ms);
-  fprintf(stderr, "num_get_proc_name: %ld, ms = %lld\n", num_get_proc_name, get_proc_name_ms);
+//  fprintf(stderr, "\nnum_get_elf_image: %ld, ms = %lld\n", num_get_elf_image, get_elf_image_ms);
+//  fprintf(stderr, "num_get_debug_link: %ld, ms = %lld\n", num_get_debug_link, get_debug_link_ms);
+//  fprintf(stderr, "num_get_proc_name: %ld, ms = %lld\n", num_get_proc_name, get_proc_name_ms);
 
   munmap (ei.image, ei.size);
   ei.image = NULL;
