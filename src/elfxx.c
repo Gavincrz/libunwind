@@ -470,9 +470,9 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
 
 
-    Elf_W (Addr) ori_dist = ~(Elf_W (Addr))0;
-    char ori_buf[1024];
-    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
+//    Elf_W (Addr) ori_dist = ~(Elf_W (Addr))0;
+//    char ori_buf[1024];
+//    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
 
     if (offp)
         *offp = min_dist;
