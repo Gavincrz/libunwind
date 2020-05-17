@@ -340,6 +340,28 @@ static inline void invalidate_edi (struct elf_dyn_info *edi)
 
 #define MAX_REGIONS 1024
 
+struct mmap_cache_entry_t {
+    /**
+     * example entry:
+     * 7fabbb09b000-7fabbb09f000 r-xp 00179000 fc:00 1180246 /lib/libc-2.11.1.so
+     *
+     * start_addr  is 0x7fabbb09b000
+     * end_addr    is 0x7fabbb09f000
+     * mmap_offset is 0x179000
+     * protections is MMAP_CACHE_PROT_READABLE|MMAP_CACHE_PROT_EXECUTABLE
+     * major       is 0xfc
+     * minor       is 0x00
+     * binary_filename is "/lib/libc-2.11.1.so"
+     */
+    unsigned long start_addr;
+    unsigned long end_addr;
+    unsigned long mmap_offset;
+    unsigned char protections;
+    unsigned long major, minor;
+    char *binary_filename;
+};
+
+
 struct mem_region
 {
     unsigned long start_addr;

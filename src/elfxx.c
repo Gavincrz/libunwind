@@ -313,6 +313,37 @@ elf_w (get_proc_name_in_image) (unw_addr_space_t as, struct elf_image *ei,
 }
 
 HIDDEN int
+elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
+                                 char *buf, size_t len, unw_word_t *offp, struct proc_info *info)
+{
+    unsigned long segbase, mapoff;
+    struct elf_image ei;
+    int ret;
+    char* file;
+    struct mmap_cache_entry_t* entry = info->mmap_cache_search_void(info->tcp, ip);
+    file = entry->binary_filename;
+    segbase = entry->start_addr;
+    mapoff = entry->mmap_offset;
+    ret = elf_map_image (&ei, file);
+
+    if (ret < 0)
+        return ret;
+
+    ret = elf_w (load_debuglink) (file, &ei, 1);
+
+    if (ret < 0)
+        return ret;
+
+    ret = elf_w (get_proc_name_in_image) (as, &ei, segbase, mapoff, ip, buf, buf_len, offp);
+
+
+    munmap (ei.image, ei.size);
+    ei.image = NULL;
+
+    return ret;
+}
+
+HIDDEN int
 elf_w (get_proc_name) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
                        char *buf, size_t buf_len, unw_word_t *offp)
 {
