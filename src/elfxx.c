@@ -434,7 +434,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     struct image_cache_entry_t *cache_entry = NULL;
     for (int i = 0; i < info->num_image_cache; i++) {
         struct image_cache_entry_t* temp_entry = &(entries[i]);
-        if (strcmp(file, cache_entry->binary_filename) == 0)
+        if (strcmp(file, temp_entry->binary_filename) == 0)
             cache_entry = temp_entry;
     }
     if (cache_entry == NULL)
