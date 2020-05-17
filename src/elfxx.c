@@ -85,20 +85,48 @@ elf_w (string_table) (struct elf_image *ei, int section)
   return ei->image + str_shdr->sh_offset;
 }
 
+
 static int
-elf_w (lookup_symbol_incache) (
-                       unw_word_t ip, struct elf_image *ei,
+lookup_symbol_in_cache (unw_word_t ip, struct image_cache_entry_t* cache_entry,
                        Elf_W (Addr) load_offset,
                        char *buf, size_t buf_len, Elf_W (Addr) *min_dist)
 {
+    Elf_W (Addr) val;
+    Elf_W (Half) st_shndx;
+    char* name;
+    int i, ret = -UNW_ENOINFO;
+    for (i = 0; i < cache_entry->num_symbol; i++) {
+        st_shndx = cache_entry->symbol_table[symbol_count].st_shndx = sym->st_shndx;
+        val = cache_entry->symbol_table[symbol_count].val;
+        name = cache_entry->symbol_table[symbol_count].name;
 
-    return 0;
+        if (st_shndx != SHN_ABS)
+            val += load_offset;
+        if (tdep_get_func_addr (as, val, &val) < 0){
+            fprintf(stderr, "How coud this happen???\n");
+            continue;
+        }
+
+        if ((Elf_W (Addr)) (ip - val) < *min_dist)
+        {
+            *min_dist = (Elf_W (Addr)) (ip - val);
+            strncpy (buf, name, buf_len);
+            buf[buf_len - 1] = '\0';
+            ret = (strlen (name) >= buf_len
+               ? -UNW_ENOMEM : 0);
+        }
+
+
+    }
+
+    return ret;
 }
 
-/*
+
 static int
-elf_w (load_fn_symbol_table) (struct elf_image *ei)
+load_fn_symbol_table (unw_addr_space_t as, struct image_cache_entry_t* cache_entry)
 {
+    struct elf_image *ei = &(cache_entry->ei);
     size_t syment_size;
     Elf_W (Ehdr) *ehdr = ei->image;
     Elf_W (Sym) *sym, *symtab, *symtab_end;
@@ -113,6 +141,9 @@ elf_w (load_fn_symbol_table) (struct elf_image *ei)
     shdr = elf_w (section_table) (ei);
     if (!shdr)
         return -UNW_ENOINFO;
+
+    int symbol_count = 0;
+
     for (i = 0; i < ehdr->e_shnum; ++i)
     {
         switch (shdr->sh_type)
@@ -134,23 +165,17 @@ elf_w (load_fn_symbol_table) (struct elf_image *ei)
                     if (ELF_W (ST_TYPE) (sym->st_info) == STT_FUNC
                         && sym->st_shndx != SHN_UNDEF)
                     {
+                        if (symbol_count >= MAX_FN_SYM) {
+                            fprintf(stderr, "number of symbol count(%d) > MAX_FN_SYM, please increase it\n",
+                                    symbol_count);
+                            assert(0);
+                        }
                         // found one symbol, record in symbol table cache
                         val = sym->st_value;
-                        if (sym->st_shndx != SHN_ABS)
-                            val += load_offset;
-                        if (tdep_get_func_addr (as, val, &val) < 0)
-                            continue;
-                        Debug (16, "0x%016lx info=0x%02x %s\n",
-                               (long) val, sym->st_info, strtab + sym->st_name);
-
-                        if ((Elf_W (Addr)) (ip - val) < *min_dist)
-                        {
-                            *min_dist = (Elf_W (Addr)) (ip - val);
-                            strncpy (buf, strtab + sym->st_name, buf_len);
-                            buf[buf_len - 1] = '\0';
-                            ret = (strlen (strtab + sym->st_name) >= buf_len
-                                   ? -UNW_ENOMEM : 0);
-                        }
+                        cache_entry->symbol_table[symbol_count].st_shndx = sym->st_shndx;
+                        cache_entry->symbol_table[symbol_count].val = val;
+                        cache_entry->symbol_table[symbol_count].name = strtab + sym->st_name;
+                        symbol_count++;
                     }
                 }
                 break;
@@ -160,9 +185,10 @@ elf_w (load_fn_symbol_table) (struct elf_image *ei)
         }
         shdr = (Elf_W (Shdr) *) (((char *) shdr) + ehdr->e_shentsize);
     }
+    cache_entry->num_symbol = symbol_count;
     return ret;
 }
- */
+
 static int
 elf_w (lookup_symbol) (unw_addr_space_t as,
                        unw_word_t ip, struct elf_image *ei,
@@ -391,7 +417,8 @@ elf_w (get_proc_name_in_image) (unw_addr_space_t as, struct elf_image *ei,
 }
 
 HIDDEN int
-elf_w (get_proc_name_in_cache) (const char* file,
+elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
+                                const char* file,
                                 unsigned long segbase,
                                 unsigned long mapoff,
                                 unw_word_t ip,
@@ -414,7 +441,7 @@ elf_w (get_proc_name_in_cache) (const char* file,
     {
         // load the cache_entry
         // load the ei image first
-        cache_entry = &(info->image_cache[info->num_image_cache]);
+        cache_entry = &(entries[info->num_image_cache]);
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
@@ -425,7 +452,7 @@ elf_w (get_proc_name_in_cache) (const char* file,
             return ret;
 
         // load the symbol table
-
+        ret = load_fn_symbol_table(as, cache_entry);
 
         info->num_image_cache++;
     }
@@ -437,30 +464,7 @@ elf_w (get_proc_name_in_cache) (const char* file,
 
     load_offset = elf_w (get_load_offset) (ei, segbase, mapoff);
 
-//
-//    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, buf, buf_len, &min_dist);
-//
-//    /* If the ELF image has MiniDebugInfo embedded in it, look up the symbol in
-//       there as well and replace the previously found if it is closer. */
-//    struct elf_image mdi;
-//    if (elf_w (extract_minidebuginfo) (ei, &mdi))
-//    {
-//        int ret_mdi = elf_w (lookup_symbol) (as, ip, &mdi, load_offset, buf,
-//                                             buf_len, &min_dist);
-//
-//        /* Closer symbol was found (possibly truncated). */
-//        if (ret_mdi == 0 || ret_mdi == -UNW_ENOMEM)
-//        {
-//            ret = ret_mdi;
-//        }
-//
-//        munmap (mdi.image, mdi.size);
-//    }
-//
-//    if (min_dist >= ei->size)
-//        return -UNW_ENOINFO;                /* not found */
-//    if (offp)
-//        *offp = min_dist;
+    ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist)
 
     return ret;
 }
@@ -484,23 +488,7 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
     mapoff = entry->mmap_offset;
 
     // search for cache
-    // ret = elf_w (get_proc_name_in_cache) (file, segbase, mapoff, ip, buf, buf_len, offp, info);
-
-    ret = elf_map_image (&ei, file);
-
-    if (ret < 0)
-        return ret;
-
-    ret = elf_w (load_debuglink) (file, &ei, 1);
-
-    if (ret < 0)
-        return ret;
-
-    ret = elf_w (get_proc_name_in_image) (as, &ei, segbase, mapoff, ip, buf, buf_len, offp);
-
-
-    munmap (ei.image, ei.size);
-    ei.image = NULL;
+    ret = elf_w (get_proc_name_in_cache) (as, file, segbase, mapoff, ip, buf, buf_len, offp, info);
 
     return ret;
 }
