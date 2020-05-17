@@ -450,9 +450,11 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
             return ret;
 
         // load debug ei
-        ret = elf_w (load_debuglink) (file, &(cache_entry->ei), 1);
+        struct elf_image debug_ei = cache_entry->ei;
+        ret = elf_w (load_debuglink) (file, &debug_ei, 1);
         if (ret < 0)
             return ret;
+        cache_entry->debug_ei = debug_ei;
 
         // load the symbol table
         ret = load_fn_symbol_table(as, cache_entry);
@@ -469,16 +471,33 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 
     ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
 
-    char ori_buf[1024];
-    unw_word_t ori_offp;
-    elf_w (get_proc_name_in_image) (as, ei, segbase, mapoff, ip, ori_buf, 1024, &ori_offp);
-
-    if (ori_offp != min_dist){
-        fprintf(stderr, "%s vs %s\n",buf, ori_buf);
-    }
+//    char ori_buf[1024];
+//    unw_word_t ori_offp;
+//    elf_w (get_proc_name_in_image) (as, ei, segbase, mapoff, ip, ori_buf, 1024, &ori_offp);
+//
+//    if (ori_offp != min_dist){
+//        fprintf(stderr, "%s vs %s\n",buf, ori_buf);
+//    }
 
     if (offp)
         *offp = min_dist;
+
+    struct elf_image ei_ori = cache_entry->debug_ei;
+
+//    ret = elf_map_image (&ei_ori, file);
+//    if (ret < 0)
+//        return ret;
+
+
+//    ret = elf_w (load_debuglink) (file, &ei_ori, 1);
+
+//    if (ret < 0)
+//        return ret;
+
+    ret = elf_w (get_proc_name_in_image) (as, &ei_ori, segbase, mapoff, ip, buf, buf_len, offp);
+
+    munmap (ei_ori.image, ei_ori.size);
+    ei_ori.image = NULL;
 
     return ret;
 }
@@ -502,7 +521,6 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
 
     // search for cache
     ret = elf_w (get_proc_name_in_cache) (as, file, segbase, mapoff, ip, buf, buf_len, offp, info);
-
 
 
 
