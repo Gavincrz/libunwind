@@ -405,6 +405,7 @@ struct proc_info
     int num_read_lseek;
     struct mmap_cache_entry_t * (*mmap_cache_search_void)(void*, unsigned long);
     void* tcp;
+    void* image_cache;
 };
 
 
