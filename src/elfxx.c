@@ -96,9 +96,9 @@ lookup_symbol_in_cache (unw_word_t ip, struct image_cache_entry_t* cache_entry,
     char* name;
     int i, ret = -UNW_ENOINFO;
     for (i = 0; i < cache_entry->num_symbol; i++) {
-        st_shndx = cache_entry->symbol_table[symbol_count].st_shndx = sym->st_shndx;
-        val = cache_entry->symbol_table[symbol_count].val;
-        name = cache_entry->symbol_table[symbol_count].name;
+        st_shndx = cache_entry->symbol_table[i].st_shndx;
+        val = cache_entry->symbol_table[i].val;
+        name = cache_entry->symbol_table[i].name;
 
         if (st_shndx != SHN_ABS)
             val += load_offset;
@@ -464,7 +464,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 
     load_offset = elf_w (get_load_offset) (ei, segbase, mapoff);
 
-    ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist)
+    ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
 
     return ret;
 }
@@ -474,7 +474,6 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
                                  char *buf, size_t buf_len, unw_word_t *offp, struct proc_info *info)
 {
     unsigned long segbase, mapoff;
-    struct elf_image ei;
     int ret;
     char* file;
 
