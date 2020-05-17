@@ -261,7 +261,6 @@ elf_w (lookup_symbol) (unw_addr_space_t as,
         }
       shdr = (Elf_W (Shdr) *) (((char *) shdr) + ehdr->e_shentsize);
     }
-  fprintf(stderr, "num_fun_symbol = %d\n", num_func_symbol);
   return ret;
 }
 
@@ -470,9 +469,12 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
 
 
-//    Elf_W (Addr) ori_dist = ~(Elf_W (Addr))0;
-//    char ori_buf[1024];
-//    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
+    Elf_W (Addr) ori_dist = ~(Elf_W (Addr))0;
+    char ori_buf[1024];
+    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
+
+
+    fprintf(stderr, "ori_name %s, ori_dist = %ld, my_name = %s, my_dist = %ld", ori_buf, ori_dist, buf, min_dist);
 
     if (offp)
         *offp = min_dist;
