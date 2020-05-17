@@ -440,10 +440,11 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     if (cache_entry == NULL)
     {
         // load the cache_entry
-        // load the file name
-        cache_entry->binary_filename = file;
         // load the ei image first
         cache_entry = &(entries[info->num_image_cache]);
+        // load the file name
+        cache_entry->binary_filename = file;
+        
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
