@@ -444,7 +444,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         cache_entry = &(entries[info->num_image_cache]);
         // load the file name
         cache_entry->binary_filename = file;
-        
+
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
@@ -468,6 +468,17 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     load_offset = elf_w (get_load_offset) (ei, segbase, mapoff);
 
     ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
+
+
+    Elf_W (Addr) ori_dist = ~(Elf_W (Addr))0;
+    char ori_buf[1024];
+    ret = elf_w (lookup_symbol) (as, ip, ei, load_offset, ori_buf, 1024, &ori_dist);
+
+
+    fprintf(stderr, "ori_name %s, ori_dist = %ld, my_name = %s, my_dist = %ld", ori_buf, ori_dist, buf, min_dist);
+
+    if (offp)
+        *offp = min_dist;
 
     return ret;
 }
