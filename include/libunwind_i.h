@@ -338,6 +338,8 @@ static inline void invalidate_edi (struct elf_dyn_info *edi)
 #endif
 }
 
+#define MAX_REGIONS 1024
+
 struct mem_region
 {
     unsigned long start_addr;
