@@ -90,7 +90,7 @@ elf_map_image (struct elf_image *ei, const char *path)
       close (fd);
       return -1;
     }
-
+  ei->mtime = stat.st_mtime;
   ei->size = stat.st_size;
   ei->image = mmap (NULL, ei->size, PROT_READ, MAP_PRIVATE, fd, 0);
   close (fd);

@@ -312,6 +312,7 @@ struct elf_image
   {
     void *image;                /* pointer to mmap'd image */
     size_t size;                /* (file-) size of the image */
+    time_t mtime;         /* last modified time */
   };
 
 struct elf_dyn_info
@@ -350,6 +351,7 @@ struct fn_symbol_table_t {
 struct image_cache_entry_t {
     struct elf_image ei;
     struct elf_image debug_ei;
+
     const char* binary_filename;
     struct fn_symbol_table_t symbol_table[MAX_FN_SYM];
     int num_symbol;
