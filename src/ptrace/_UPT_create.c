@@ -42,6 +42,13 @@ _UPT_create (pid_t pid)
 #if UNW_TARGET_IA64
   ui->edi.ktab.format = -1;
 #endif
-
+  
+ // initialize the image cache
+ struct proc_info* info = (struct proc_info*)ui;
+ // give it a max region
+ size_t cache_size = sizeof(struct image_cache_entry_t) * MAX_REGIONS;
+ struct image_cache_entry_t* image_cache = malloc(cache_size);
+ memset (image_cache, 0, cache_size);
+ info->image_cache = image_cache;
   return ui;
 }
