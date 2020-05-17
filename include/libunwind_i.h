@@ -57,6 +57,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <sys/mman.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <elf.h>
 
 #if defined(HAVE_ELF_H)
 # include <elf.h>
@@ -339,6 +340,25 @@ static inline void invalidate_edi (struct elf_dyn_info *edi)
 }
 
 #define MAX_REGIONS 1024
+
+struct fn_symbol_table_t {
+    char* name;
+#if ELF_CLASS == ELFCLASS64
+    Elf64_Addr val;
+#elif ELF_CLASS == ELFCLASS32
+    Elf32_Addr val;
+#endif
+};
+
+struct image_cache_entry_t {
+    struct elf_image *ei;
+    char* binary_filename;
+    struct elf_image *debug_ei;
+    struct fn_symbol_table_t* symbol_table;
+    int num_symbol;
+};
+
+
 
 struct mmap_cache_entry_t {
     /**
