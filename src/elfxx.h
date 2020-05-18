@@ -91,6 +91,7 @@ elf_map_image (struct elf_image *ei, const char *path)
       return -1;
     }
   if (ei->mtime == stat.st_mtime) {
+      fprintf(stderr, "file not change, do not reload!!! %s\n", path);
       close (fd);
       return 0;
   }

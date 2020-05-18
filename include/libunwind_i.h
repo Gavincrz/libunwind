@@ -356,6 +356,9 @@ struct image_cache_entry_t {
     struct fn_symbol_table_t symbol_table[MAX_FN_SYM];
     int num_symbol;
     bool need_update;
+
+    time_t ei_time;
+    time_t debug_time;
 };
 
 

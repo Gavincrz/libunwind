@@ -122,6 +122,15 @@ lookup_symbol_in_cache (unw_word_t ip, struct image_cache_entry_t* cache_entry,
     return ret;
 }
 
+static void
+clear_symbol_table (struct image_cache_entry_t* cache_entry){
+    for (int i = 0; i < MAX_FN_SYM; i++) {
+        cache_entry->symbol_table[i].name = NULL;
+        cache_entry->symbol_table[i].val = 0;
+        cache_entry->symbol_table[i].st_shndx = 0;
+    }
+    cache_entry->num_symbol = 0;
+}
 
 static int
 load_fn_symbol_table (unw_addr_space_t as, struct image_cache_entry_t* cache_entry)
@@ -447,6 +456,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
+        cache_entry->ei_time = cache_entry->ei.mtime;
         if (ret < 0)
             return ret;
 
@@ -455,6 +465,8 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         if (ret < 0)
             return ret;
 
+        cache_entry->debug_time = cache_entry->ei.mtime;
+
         // load the symbol table
         load_fn_symbol_table(as, cache_entry);
 
@@ -462,19 +474,30 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     }
 
     if (cache_entry->need_update) {
-        time_t saved_mtime = cache_entry->ei.mtime;
+        time_t saved_debug_time = cache_entry->debug_time;
+        cache_entry->ei.mtime = cache_entry->ei_time;
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
-        if (saved_mtime != cache_entry->ei.mtime) {
-            fprintf(stderr, "file %s has been changed!!\n", file);
-            ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
-            if (ret < 0)
-                return ret;
+
+        cache_entry->ei_time = cache_entry->ei.mtime;
+
+        // reload the debug ei
+        cache_entry->ei.mtime = cache_entry->debug_time;
+        ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
+        if (ret < 0)
+            return ret;
+        cache_entry->debug_time = cache_entry->ei.mtime;
+
+        if (saved_debug_time != cache_entry->debug_time) {
+            fprintf(stderr, "debug file has been changed!!!\n");
+            // clear symbol table
+            clear_symbol_table(cache_entry);
+            // load the symbol table
+            load_fn_symbol_table(as, cache_entry);
         }
-        // load the symbol table
-        load_fn_symbol_table(as, cache_entry);
+
         cache_entry->need_update = false;
     }
 
@@ -488,8 +511,18 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     ret = lookup_symbol_in_cache (ip, cache_entry, load_offset, buf, buf_len, &min_dist);
 
 
-    if (offp)
-        *offp = min_dist;
+//    ret = elf_w (load_debuglink) (file, &ei, 1);
+//
+//    if (ret < 0)
+//        return ret;
+//
+//    ret = elf_w (get_proc_name_in_image) (as, &ei, segbase, mapoff, ip, buf, buf_len, offp);
+
+//    munmap (ei->image, ei->size);
+//    ei->image = NULL;
+
+//    if (offp)
+//        *offp = min_dist;
     return ret;
 }
 
@@ -522,9 +555,6 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
 
     // search for cache
     ret = elf_w (get_proc_name_in_cache) (as, pid, file, segbase, mapoff, ip, buf, buf_len, offp, info);
-
-
-
 
 
     return ret;
