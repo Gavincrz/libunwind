@@ -453,7 +453,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         cache_entry = &(entries[info->num_image_cache]);
 
         // load the file name
-        strcpy(file, cache_entry->binary_filename);
+        strcpy(cache_entry->binary_filename, file);
 
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
