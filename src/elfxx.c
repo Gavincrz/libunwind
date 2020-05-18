@@ -482,7 +482,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 //
 //        cache_entry->ei.mtime = 0;
         // load the ei image
-        mumap(cache_entry->ei.image, cache_entry->ei.size);
+        munmap(cache_entry->ei.image, cache_entry->ei.size);
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
