@@ -355,6 +355,7 @@ struct image_cache_entry_t {
     const char* binary_filename;
     struct fn_symbol_table_t symbol_table[MAX_FN_SYM];
     int num_symbol;
+    bool need_update;
 };
 
 
@@ -406,6 +407,7 @@ struct proc_info
     void* tcp;
     void* image_cache;
     int num_image_cache;
+    bool update; // check if file has been updated
 };
 
 
