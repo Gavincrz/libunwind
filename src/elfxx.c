@@ -533,8 +533,8 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 //    munmap (ei->image, ei->size);
 //    ei->image = NULL;
 
-//    if (offp)
-//        *offp = min_dist;
+    if (offp)
+        *offp = min_dist;
     return ret;
 }
 
