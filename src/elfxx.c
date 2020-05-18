@@ -460,6 +460,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         if (ret < 0)
             return ret;
 
+        cache_entry->ei.mtime = 0; //reload every time
         // load debug ei
         ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
         if (ret < 0)
@@ -477,6 +478,8 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         time_t saved_debug_time = cache_entry->debug_time;
         time_t saved_ei_time = cache_entry->ei_time;
         cache_entry->ei.mtime = cache_entry->ei_time;
+
+        cache_entry->ei.mtime = 0;
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
@@ -486,6 +489,13 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 
         // reload the debug ei
         cache_entry->ei.mtime = cache_entry->debug_time;
+
+        if (saved_ei_time != cache_entry->ei_time) {
+            cache_entry->ei.mtime = 0;
+        }
+
+        cache_entry->ei.mtime = 0;
+
         ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
         if (ret < 0)
             return ret;
@@ -820,6 +830,7 @@ elf_w (load_debuglink) (const char* file, struct elf_image *ei, int is_local)
         }
       else
         {
+          fprintf(stderr, "umap: 0x%lx, file= %s, newname = %s\n", (void*)prev_image, file, newname);
           munmap (prev_image, prev_size);
         }
 

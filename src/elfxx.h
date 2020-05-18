@@ -90,15 +90,6 @@ elf_map_image (struct elf_image *ei, const char *path)
       close (fd);
       return -1;
     }
-  if (ei->mtime == stat.st_mtime) {
-      fprintf(stderr, "file not change, do not reload!!! %s\n", path);
-      close (fd);
-      return 2;
-  }
-  if (ei->image != NULL) {
-      munmap(ei->image, ei->size);
-      ei->image = NULL;
-  }
 
   ei->mtime = stat.st_mtime;
   ei->size = stat.st_size;
