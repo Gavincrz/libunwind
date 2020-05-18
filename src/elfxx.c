@@ -574,13 +574,13 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
 
 
     // clear all cahces
-    if (info->update) {
-        struct image_cache_entry_t *entries = info->image_cache;
-        for (int i = 0; i < info->num_image_cache; i++) {
-            entries[i].need_update = true;
-        }
-        info->update = false;
-    }
+//    if (info->update) {
+//        struct image_cache_entry_t *entries = info->image_cache;
+//        for (int i = 0; i < info->num_image_cache; i++) {
+//            entries[i].need_update = true;
+//        }
+//        info->update = false;
+//    }
 
     // search for cache
     ret = elf_w (get_proc_name_in_cache) (as, pid, file, segbase, mapoff, ip, buf, buf_len, offp, info);
