@@ -47,6 +47,9 @@ extern int elf_w (get_proc_name) (unw_addr_space_t as,
                                   char *buf, size_t len,
                                   unw_word_t *offp);
 
+extern void
+clear_cache (struct proc_info *info);
+
 extern int elf_w (get_proc_name_with_info) (unw_addr_space_t as,
                                   pid_t pid, unw_word_t ip,
                                   char *buf, size_t len,

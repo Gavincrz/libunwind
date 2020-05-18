@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 void
 _UPT_destroy (void *ptr)
 {
+  clear_cache(ptr);
   struct UPT_info *ui = (struct UPT_info *) ptr;
   invalidate_edi (&ui->edi);
   free (ptr);

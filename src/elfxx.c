@@ -538,6 +538,21 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     return ret;
 }
 
+void
+clear_cache (struct proc_info *info)
+{
+    struct image_cache_entry_t *entries = info->image_cache;
+    size_t cache_size = sizeof(struct image_cache_entry_t) * MAX_REGIONS;
+
+    for (int i = 0; i < MAX_REGIONS; i++) {
+        if (entries[i].ei.image) {
+            munmap(entries[i].ei.image, entries[i].ei.size);
+        }
+    }
+    info->num_image_cache = 0;
+    memset (entries, 0, cache_size);
+}
+
 HIDDEN int
 elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
                                  char *buf, size_t buf_len, unw_word_t *offp, struct proc_info *info)
@@ -556,13 +571,10 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
     mapoff = entry->mmap_offset;
 
 
-    // mark all caches to be update
+
+    // clear all cahces
     if (info->update) {
-        struct image_cache_entry_t *entries = info->image_cache;
-        for (int i = 0; i < info->num_image_cache; i++){
-            entries[i].need_update = true;
-        }
-        info->update = false;
+        clear_cache(info);
     }
 
     // search for cache
