@@ -545,13 +545,12 @@ clear_cache (struct proc_info *info)
     struct image_cache_entry_t *entries = info->image_cache;
     size_t cache_size = sizeof(struct image_cache_entry_t) * MAX_REGIONS;
 
-    for (int i = 0; i < MAX_REGIONS; i++) {
+    for (int i = 0; i < info->num_image_cache; i++) {
         if (entries[i].ei.image) {
             munmap(entries[i].ei.image, entries[i].ei.size);
         }
     }
     info->num_image_cache = 0;
-    memset (entries, 0, cache_size);
 }
 
 HIDDEN int
