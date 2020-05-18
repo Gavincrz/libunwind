@@ -451,7 +451,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
             return ret;
 
         // load debug ei
-        ret = load_debuglink(file, &(cache_entry->ei), 1);
+        ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
         if (ret < 0)
             return ret;
 
@@ -469,7 +469,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
             return ret;
         if (saved_mtime != cache_entry->ei.mtime) {
             fprintf(stderr, "file %s has been changed!!\n", file);
-            ret = load_debuglink(file, &(cache_entry->ei), 1);
+            ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
             if (ret < 0)
                 return ret;
         }
