@@ -575,6 +575,7 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
     // clear all cahces
     if (info->update) {
         clear_cache(info);
+        nfo->update = false;
     }
 
     // search for cache
