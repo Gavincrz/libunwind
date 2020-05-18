@@ -475,39 +475,40 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
     }
 
     if (cache_entry->need_update) {
-        time_t saved_debug_time = cache_entry->debug_time;
-        time_t saved_ei_time = cache_entry->ei_time;
-        cache_entry->ei.mtime = cache_entry->ei_time;
-
-        cache_entry->ei.mtime = 0;
+//        fprintf(stderr, "need update!! for file %s\n", file);
+//        time_t saved_debug_time = cache_entry->debug_time;
+//        time_t saved_ei_time = cache_entry->ei_time;
+//        cache_entry->ei.mtime = cache_entry->ei_time;
+//
+//        cache_entry->ei.mtime = 0;
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
         if (ret < 0)
             return ret;
-
-        cache_entry->ei_time = cache_entry->ei.mtime;
-
-        // reload the debug ei
-        cache_entry->ei.mtime = cache_entry->debug_time;
-
-        if (saved_ei_time != cache_entry->ei_time) {
-            cache_entry->ei.mtime = 0;
-        }
-
-        cache_entry->ei.mtime = 0;
+//
+//        cache_entry->ei_time = cache_entry->ei.mtime;
+//
+//        // reload the debug ei
+//        cache_entry->ei.mtime = cache_entry->debug_time;
+//
+//        if (saved_ei_time != cache_entry->ei_time) {
+//            cache_entry->ei.mtime = 0;
+//        }
+//
+//        cache_entry->ei.mtime = 0;
 
         ret = elf_w(load_debuglink)(file, &(cache_entry->ei), 1);
         if (ret < 0)
             return ret;
-        cache_entry->debug_time = cache_entry->ei.mtime;
+//        cache_entry->debug_time = cache_entry->ei.mtime;
 
-        if (saved_debug_time != cache_entry->debug_time || saved_ei_time != cache_entry->ei_time) {
-            fprintf(stderr, "debug file has been changed!!!\n");
+//        if (saved_debug_time != cache_entry->debug_time || saved_ei_time != cache_entry->ei_time) {
+//            fprintf(stderr, "debug file has been changed!!!\n");
             // clear symbol table
             clear_symbol_table(cache_entry);
             // load the symbol table
             load_fn_symbol_table(as, cache_entry);
-        }
+//        }
 
         cache_entry->need_update = false;
     }
@@ -643,96 +644,6 @@ elf_w (find_section) (struct elf_image *ei, const char* secname)
   return 0;
 }
 
-int
-load_debuglink_to_new_ei (const char* file, struct elf_image *old_ei, struct elf_image *new_ei, int is_local)
-{
-    int ret;
-    Elf_W (Shdr) *shdr;
-
-    if (!old_ei->image)
-    {
-        ret = elf_map_image(old_ei, file);
-        if (ret)
-            return ret;
-    }
-
-    /* Ignore separate debug files which contain a .gnu_debuglink section. */
-    if (is_local == -1) {
-        return 0;
-    }
-
-    shdr = elf_w (find_section) (old_ei, ".gnu_debuglink");
-    if (shdr) {
-        if (shdr->sh_size >= PATH_MAX ||
-            (shdr->sh_offset + shdr->sh_size > old_ei->size))
-        {
-            return 0;
-        }
-
-        {
-            char linkbuf[shdr->sh_size];
-            char *link = ((char *) old_ei->image) + shdr->sh_offset;
-            char *p;
-            static const char *debugdir = "/usr/lib/debug";
-            char basedir[strlen(file) + 1];
-            char newname[shdr->sh_size + strlen (debugdir) + strlen (file) + 9];
-
-            memcpy(linkbuf, link, shdr->sh_size);
-
-            if (memchr (linkbuf, 0, shdr->sh_size) == NULL)
-                return 0;
-
-            Debug(1, "Found debuglink section, following %s\n", linkbuf);
-
-            p = strrchr (file, '/');
-            if (p != NULL)
-            {
-                memcpy (basedir, file, p - file);
-                basedir[p - file] = '\0';
-            }
-            else
-                basedir[0] = 0;
-
-            strcpy (newname, basedir);
-            strcat (newname, "/");
-            strcat (newname, linkbuf);
-            ret = elf_map_image(new_ei, newname);
-
-            if (ret == -1)
-            {
-                strcpy (newname, basedir);
-                strcat (newname, "/.debug/");
-                strcat (newname, linkbuf);
-                ret = elf_map_image(new_ei, newname);
-            }
-
-            if (ret == -1 && is_local == 1)
-            {
-                strcpy (newname, debugdir);
-                strcat (newname, basedir);
-                strcat (newname, "/");
-                strcat (newname, linkbuf);
-                ret = elf_map_image(new_ei, newname);
-            }
-
-            if (ret == -1)
-            {
-                new_ei->image = old_ei->image;
-                new_ei->size = old_ei->size;
-                return 0;
-            }
-
-            return ret;
-        }
-    }
-    else {
-        new_ei->image = old_ei->image;
-        new_ei->size = old_ei->size;
-    }
-
-    return 0;
-}
-
 
 /* Load a debug section, following .gnu_debuglink if appropriate
  * Loads ei from file if not already mapped.
@@ -830,7 +741,7 @@ elf_w (load_debuglink) (const char* file, struct elf_image *ei, int is_local)
         }
       else
         {
-          fprintf(stderr, "umap: 0x%lx, file= %s, newname = %s\n", (void*)prev_image, file, newname);
+//          fprintf(stderr, "umap: 0x%lx, file= %s, newname = %s\n", (void*)prev_image, file, newname);
           munmap (prev_image, prev_size);
         }
 
