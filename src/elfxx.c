@@ -451,8 +451,9 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
         // load the cache_entry
 
         cache_entry = &(entries[info->num_image_cache]);
+
         // load the file name
-        cache_entry->binary_filename = file;
+        strcpy(file, cache_entry->binary_filename);
 
         // load the ei image
         ret = elf_map_image (&(cache_entry->ei), file);
@@ -574,7 +575,10 @@ elf_w (get_proc_name_with_info) (unw_addr_space_t as, pid_t pid, unw_word_t ip,
 
     // clear all cahces
     if (info->update) {
-        clear_cache(info);
+        struct image_cache_entry_t *entries = info->image_cache;
+        for (int i = 0; i < info->num_image_cache; i++) {
+            entries[i].need_update = true;
+        }
         info->update = false;
     }
 

@@ -58,6 +58,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
 #include <stdbool.h>
 #include <stdio.h>
 #include <elf.h>
+#include <limits.h>
 
 #if defined(HAVE_ELF_H)
 # include <elf.h>
@@ -352,7 +353,7 @@ struct image_cache_entry_t {
     struct elf_image ei;
     struct elf_image debug_ei;
 
-    const char* binary_filename;
+    char binary_filename[PATH_MAX];
     struct fn_symbol_table_t symbol_table[MAX_FN_SYM];
     int num_symbol;
     bool need_update;
