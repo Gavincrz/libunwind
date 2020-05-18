@@ -489,7 +489,7 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 
 
     if (offp)
-        *offp = min_dist_ori;
+        *offp = min_dist;
     return ret;
 }
 
