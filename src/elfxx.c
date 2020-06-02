@@ -534,6 +534,9 @@ elf_w (get_proc_name_in_cache) (unw_addr_space_t as,
 //    munmap (ei->image, ei->size);
 //    ei->image = NULL;
 
+    if (min_dist >= ei->size)
+        return -UNW_ENOINFO;
+    
     if (offp)
         *offp = min_dist;
     return ret;
